@@ -113,3 +113,14 @@ class TestEnsemble(unittest.TestCase):
         with self.assertRaises(OrchestratorError):
             Orchestrator([Fake("a", out="x")]).run_ensemble(
                 Task("text", "x", side_effect=True, approved=True))
+
+
+class TestNoProvider(unittest.TestCase):
+    def test_clear_error_when_none_available(self):
+        class Down(Fake):
+            env_key = "SOME_KEY"
+            def healthy(self):
+                return False
+        with self.assertRaises(OrchestratorError) as cm:
+            Orchestrator([Down("a", out="x")]).run(Task("text", "x"))
+        self.assertIn("SOME_KEY", str(cm.exception))

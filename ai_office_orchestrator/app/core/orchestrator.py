@@ -42,6 +42,11 @@ class Orchestrator:
             raise OrchestratorError("side-effect task requires approval")
         attempts = []
         candidates = self.ranked(task)
+        if not candidates:
+            keys = sorted({a.env_key for a in self.adapters.values() if a.env_key})
+            raise OrchestratorError(
+                f"no provider available for task kind '{task.kind}'. "
+                f"Set at least one credential: {', '.join(keys)}")
         if task.side_effect:
             candidates = candidates[:1]
         for name in candidates[: self.max_attempts]:
